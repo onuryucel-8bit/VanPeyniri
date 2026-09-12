@@ -1,11 +1,19 @@
 #include <iostream>
 #include <memory>
+#include <fstream>
+#include <vector>
+#include <string>
+#include <sstream>
+#include <chrono>
+#include <array>
 
 #include "SDL3/SDL.h"
 
 #include "imgui.h"
 #include "backends/imgui_impl_sdl3.h"
 #include "backends/imgui_impl_sdlrenderer3.h"
+
+#include "reproc++/reproc.hpp"
 
 #include "mos6502/mos6502.h"
 
@@ -22,23 +30,27 @@ private:
 	void initSDL();
 	void initImgui();
 
+	//========================================//
 	void update();
 	void inputs();
 	void draw();
 	void drawImgui();
-
+	//========================================//
 
 	static void busWrite(uint16_t address, uint8_t data);
 	static uint8_t busRead(uint16_t address);
 
+	void callAssembler();
+	void loadAsmFile();
+
+	//========================================//
 	const int WindowWidth = 800;
 	const int WindowHeight = 600;
 	SDL_Window* window = nullptr;
 
 	SDL_Renderer* renderer = nullptr;
 	bool f_running = true;
-
-	ImGuiIO* io;
+	bool f_runCpu = true;
 
 	mos6502 cpu;
 	

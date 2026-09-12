@@ -31,6 +31,10 @@ target_include_directories(baku INTERFACE ${LIBS_LOCAL_DIR}/baku)
 
 add_subdirectory(${LIBS_LOCAL_DIR}/imgui-docking imgui_build)
 add_subdirectory(${LIBS_LOCAL_DIR}/tracy tracy_build)
+add_subdirectory(${LIBS_LOCAL_DIR}/tiny-process tiny_process_build)
+
+set(REPROC++ ON)
+add_subdirectory(${LIBS_LOCAL_DIR}/reproc reproc_build)
 
 #=====================================================================#
 #=====================================================================#
@@ -51,7 +55,10 @@ target_link_libraries(${PROJECT_NAME}  PRIVATE
     SDL3::SDL3
     imgui
     Tracy::TracyClient
+    tiny-process-library
+    reproc++
     baku
 )
 
 target_compile_definitions(${PROJECT_NAME}  PUBLIC cmake_PROJECT_RES="${CMAKE_CURRENT_SOURCE_DIR}/res/")
+target_compile_definitions(${PROJECT_NAME}  PUBLIC cmake_PROJECT_RES_FOLDER="${CMAKE_CURRENT_SOURCE_DIR}/res")

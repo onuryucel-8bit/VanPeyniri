@@ -2,13 +2,11 @@
 
 Application::Application()
     :cpu(Application::busRead, Application::busWrite)
-{
-    m_RAM[0] = 0xA9;
-    m_RAM[1] = 0x05;
-    m_RAM[2] = 0xA9;
-    m_RAM[3] = 0x0F;
-  
+{  
     cpu.Reset();
+    
+    loadAsmFile();
+            
 }
 
 Application::~Application()
@@ -25,32 +23,82 @@ uint8_t Application::busRead(uint16_t address)
     return m_RAM[address];
 }
 
+void Application::callAssembler()
+{
+    reproc::process process;
+
+    std::array<std::string, 2> args;
+    args[0] = "make";
+    args[1] = "run";
+
+    reproc::options options;
+    options.working_directory = cmake_PROJECT_RES;
+
+    reproc::arguments arguments(args);
+
+
+    std::error_code err = process.start(arguments, options);
+
+    if (err)
+    {
+        std::cout << "err.message()" << err.message() << "\n";
+    }
+
+    using namespace std::chrono_literals;
+    std::pair<int, std::error_code> status = process.wait(5s);
+}
+
+void Application::loadAsmFile()
+{
+    std::ifstream file(cmake_PROJECT_RES "output.bin", std::ios::binary);
+
+    if (!file.is_open())
+    {
+        std::cout << "HATA:: Dosyanin konumu veya ismi yanlis...\n" << cmake_PROJECT_RES "output.bin" << "\n";
+    }
+
+    // get its size:
+    std::streampos fileSize;
+
+    file.seekg(0, std::ios::end);
+    fileSize = file.tellg();
+    file.seekg(0, std::ios::beg);
+
+    file.read((char*)m_RAM.get(), fileSize);
+
+
+    for (size_t i = 0; i < 10; i++)
+    {
+        std::cout << std::hex << (int)m_RAM[i] << "\n";
+    }
+}
+
 void Application::run()
 {    
     initSDL();
     initImgui();
 
     uint64_t cycleCount = 10;
-
-    //for (size_t i = 0; i < 20; i++)
-    {
-        cpu.Run(1, cycleCount);
-    }
-
+    
     while (f_running)
     {
         inputs();
 
         update();
 
+        //=============================================//
         SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
         SDL_RenderClear(renderer);
         drawImgui();
         draw();
         //swap buffers
         SDL_RenderPresent(renderer);
+        //=============================================//
 
-        
+        if (f_runCpu)
+        {
+            cpu.Run(1, cycleCount);
+        }
     }
 }
 
@@ -78,6 +126,22 @@ void Application::drawImgui()
     //===================================================//
 
     ImGui::Begin("yazi");
+
+    if (ImGui::Button("Derle DASM"))
+    {
+        callAssembler();
+        loadAsmFile();
+    }
+
+    if (ImGui::Button("Sifirla"))
+    {
+        cpu.Reset();
+    }
+
+    if (ImGui::Button("Durdur"))
+    {
+        f_runCpu = !f_runCpu;
+    }
 
     ImGui::Text("pc %x", cpu.GetPC());
 
@@ -192,7 +256,7 @@ void Application::initImgui()
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
 
-    io = &ImGui::GetIO();
+    ImGuiIO* io = &ImGui::GetIO();
 
     // Enable Docking
     io->ConfigFlags |= ImGuiConfigFlags_DockingEnable;
