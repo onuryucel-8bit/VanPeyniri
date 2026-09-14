@@ -13,9 +13,28 @@
 #include "backends/imgui_impl_sdl3.h"
 #include "backends/imgui_impl_sdlrenderer3.h"
 
+#include "imgui_memory_editor.h"
+
 #include "reproc++/reproc.hpp"
 
 #include "mos6502/mos6502.h"
+
+/*
+
+sp = sp + 0x100
+
+
+------------------ 0
+	Zero Page
+------------------ 0xFF
+
+------------------ 0x100
+	Yigin
+------------------ 0x1FF
+
+
+*/
+
 
 class Application
 {
@@ -36,6 +55,8 @@ private:
 	void draw();
 	void drawImgui();
 	//========================================//
+
+	void drawRegisterRow(const char* name, uint8_t value);
 
 	static void busWrite(uint16_t address, uint8_t data);
 	static uint8_t busRead(uint16_t address);

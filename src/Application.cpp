@@ -13,8 +13,23 @@ Application::~Application()
 {
 }
 
+void Application::drawRegisterRow(const char* name, uint8_t value)
+{
+    ImGui::TableNextRow();
+
+    ImGui::TableSetColumnIndex(0);
+    ImGui::Text("%s", name);
+
+    ImGui::TableSetColumnIndex(1);
+    ImGui::Text("0x%X", value);
+
+    ImGui::TableSetColumnIndex(2);
+    ImGui::Text("%u", value);
+}
+
 void Application::busWrite(uint16_t address, uint8_t data)
 {
+    std::cout << "address" << address << "\n";
     m_RAM[address] = data;
 }
 
@@ -107,14 +122,10 @@ void Application::update()
 
 }
 
-
 void Application::draw()
 {
-    SDL_FRect rect = { 100, 100, 32,32 };
-    SDL_SetRenderDrawColor(renderer, 0, 255, 0, 255);
-    SDL_RenderFillRect(renderer, &rect);
+    
 }
-
 
 void Application::drawImgui()
 {
@@ -141,9 +152,7 @@ void Application::drawImgui()
     if (ImGui::Button("Durdur"))
     {
         f_runCpu = !f_runCpu;
-    }
-
-    ImGui::Text("pc %x", cpu.GetPC());
+    }    
 
     static ImGuiTableFlags flags = ImGuiTableFlags_SizingFixedFit
         | ImGuiTableFlags_RowBg
@@ -162,59 +171,19 @@ void Application::drawImgui()
         //sonraki satira gec
         ImGui::TableHeadersRow();
 
-        {
-            //sonraki satira gec
-            ImGui::TableNextRow();
+        drawRegisterRow("PC", cpu.GetPC());
+        drawRegisterRow("flag", cpu.GetP());
+        drawRegisterRow("Sp", cpu.GetS());
 
-            //sutun 0
-            ImGui::TableSetColumnIndex(0);
-            ImGui::Text("A");
-
-            //sutun 1
-            ImGui::TableSetColumnIndex(1);
-            ImGui::Text("0x%02X", cpu.GetA());
-
-            //sutun 2
-            ImGui::TableSetColumnIndex(2);
-            ImGui::Text("%u", cpu.GetA());
-        }
-
-        {
-            //sonraki satira gec
-            ImGui::TableNextRow();
-
-            //sutun 0
-            ImGui::TableSetColumnIndex(0);
-            ImGui::Text("X");
-
-            //sutun 1
-            ImGui::TableSetColumnIndex(1);
-            ImGui::Text("0x%02X", cpu.GetX());
-
-            //sutun 2
-            ImGui::TableSetColumnIndex(2);
-            ImGui::Text("%u", cpu.GetX());
-        }
-
-        {
-            //sonraki satira gec
-            ImGui::TableNextRow();
-
-            //sutun 0
-            ImGui::TableSetColumnIndex(0);
-            ImGui::Text("Y");
-
-            //sutun 1
-            ImGui::TableSetColumnIndex(1);
-            ImGui::Text("0x%02X", cpu.GetY());
-
-            //sutun 2
-            ImGui::TableSetColumnIndex(2);
-            ImGui::Text("%u", cpu.GetY());
-        }
+        drawRegisterRow("A", cpu.GetA());
+        drawRegisterRow("X", cpu.GetX());
+        drawRegisterRow("Y", cpu.GetY());
 
         ImGui::EndTable();
     }
+
+    static MemoryEditor mem_edit;
+    mem_edit.DrawWindow("Memory Editor", m_RAM.get(), 0xFFFF);
 
     ImGui::End();
 
@@ -226,9 +195,6 @@ void Application::drawImgui()
     ImGui::Render();
     ImGui_ImplSDLRenderer3_RenderDrawData(ImGui::GetDrawData(), renderer);
 }
-
-
-
 
 void Application::inputs()
 {

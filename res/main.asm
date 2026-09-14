@@ -6,3 +6,5 @@
 
 	lda #5
 	
+loop:
+    jmp loop
