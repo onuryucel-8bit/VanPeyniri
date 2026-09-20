@@ -167,22 +167,7 @@ v0.2
 degiskenler
 
 int a; 
-<ifade> 
- <degisken>
-  "int" <degisken_ismi> ";"
-   <degisken_ismi> => a 
-  
 int a = 4;
-<ifade> 
- <degisken>
-  "int" <degisken_ismi> <atama>? ";"
-    <degisken_ismi> => a
-     <atama> "="
-      <ifade>
-       <islem>
-        <carpma>
-
-
 int a = 2 + 1;
 int a = b;
 
@@ -194,7 +179,6 @@ int a = b;
 <degisken> ::= "int" <degisken_ismi> <atama>? ";"
 
 <atama> ::= "=" <ifade>
-
 
 <islem> ::= <carpma> (("+" | "-") <carpma>)*
 <carpma> ::= <sayi> (("*" | "/") <sayi>)*
