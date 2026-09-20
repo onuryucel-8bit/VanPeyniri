@@ -6,11 +6,11 @@ Application::Application()
     cpu.Reset();
     
     loadAsmFile();
-            
-}
+}   
 
 Application::~Application()
 {
+    
 }
 
 void Application::drawRegisterRow(const char* name, uint8_t value)
@@ -29,7 +29,7 @@ void Application::drawRegisterRow(const char* name, uint8_t value)
 
 void Application::busWrite(uint16_t address, uint8_t data)
 {
-    std::cout << "address" << address << "\n";
+    //std::cout << "address" << address << "\n";
     m_RAM[address] = data;
 }
 

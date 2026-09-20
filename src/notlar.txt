@@ -1,1 +1,30 @@
-14.09.2026 | hicbir islem donmuyor ama neden sp artiyor? 
+===================================================================================
+19.09.2026 | neden reset() tam calismiyor program sayacini elle kurucu icinde ayarlayip sifirlama tusuna basinca pc = 0xff00 olmasi lazim
+
+Application::Application()
+    :cpu(Application::busRead, Application::busWrite)
+{  
+    cpu.Reset();
+    
+    loadAsmFile();
+    //RESET low  $FFFC        
+    //RESET high $FFFD
+
+    m_RAM[0xFFFC] = 0x00;
+    m_RAM[0xFFFD] = 0xFF;
+    //static const uint16_t rstVectorH = 0xFFFD;
+    //static const uint16_t rstVectorL = 0xFFFC;
+}   
+
+if (ImGui::Button("Sifirla"))
+{
+    cpu.Reset();
+}
+
+\-19.09.2026 hee main.asm vektorleri yazmayi unutmusum
+
+===================================================================================
+14.09.2026 | hicbir islem donmuyor ama neden sp artiyor?
+\-19.09.2026 => sebebi 0x00 brk komutuna denk geliyormus
+https://csh.rit.edu/~moffitt/docs/6502.html#BRK
+===================================================================================
