@@ -28,7 +28,7 @@ project(VanPeyniri VERSION 1.0)
 
 
 # kutuphanelerin dosya yolu
-set(LIBS_LOCAL_DIR ${CMAKE_CURRENT_SOURCE_DIR}/libs)
+set(LIBS_LOCAL_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../libs)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED True)

@@ -1,0 +1,24 @@
+//tiny basic
+//print
+PRINT "ABC"
+LET A = 5
+PRINT A
+
+loop:
+
+IF A < B THEN
+    A = 0
+ELSE
+    A = 10
+END
+
+INPUT A
+
+GOTO loop
+
+CALL fx()
+
+
+fx()
+    LET B = 4
+RETURN
