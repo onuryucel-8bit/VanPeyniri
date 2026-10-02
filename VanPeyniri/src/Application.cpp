@@ -1,11 +1,29 @@
 #include "Application.h"
 
 Application::Application()
-    :cpu(Application::busRead, Application::busWrite)
 {  
-    cpu.Reset();
-    
     loadAsmFile();
+
+    //islemci isaretcisini yolla
+    m_mem_edit.UserData = &m_bus.m_cpu;
+
+    //program sayacinin rengi
+    m_mem_edit.HighlightColor = IM_COL32(100, 100, 0, 255);
+
+    //mem_edit\e arka plan rengini ayarlayacak callback fonksiyonunu yolluyoruz 
+    m_mem_edit.HighlightFn = [](const ImU8* data, size_t off, void* user_data) -> bool
+    {
+        mos6502* cpu = static_cast<mos6502*>(user_data);
+        return (off == cpu->GetPC());
+    };
+
+    m_disassemblyTable[0xA5] = "LDA zero page";
+    m_disassemblyTable[0xA9] = "LDA imm";
+    m_disassemblyTable[0x8D] = "STA";
+    m_disassemblyTable[0x4C] = "JMP";
+    m_disassemblyTable[0xE6] = "INC zero page";
+    m_disassemblyTable[0x40] = "RTI";
+
 }   
 
 Application::~Application()
@@ -25,17 +43,6 @@ void Application::drawRegisterRow(const char* name, uint8_t value)
 
     ImGui::TableSetColumnIndex(2);
     ImGui::Text("%u", value);
-}
-
-void Application::busWrite(uint16_t address, uint8_t data)
-{
-    //std::cout << "address" << address << "\n";
-    m_RAM[address] = data;
-}
-
-uint8_t Application::busRead(uint16_t address)
-{
-    return m_RAM[address];
 }
 
 void Application::callAssembler()
@@ -79,17 +86,11 @@ void Application::loadAsmFile()
     fileSize = file.tellg();
     file.seekg(0, std::ios::beg);
 
-    file.read((char*)m_RAM.get(), fileSize);
-
-
-    for (size_t i = 0; i < 10; i++)
-    {
-        std::cout << std::hex << (int)m_RAM[i] << "\n";
-    }
+    file.read((char*)m_bus.m_RAM.get(), fileSize);    
 }
 
 void Application::run()
-{    
+{     
     initSDL();
     initImgui();
 
@@ -104,16 +105,24 @@ void Application::run()
         //=============================================//
         SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
         SDL_RenderClear(renderer);
+
+        m_bus.m_gpu.run();
+        m_bus.m_gpu.draw(renderer);
+
         drawImgui();
         draw();
+        
         //swap buffers
         SDL_RenderPresent(renderer);
         //=============================================//
 
-        if (f_runCpu)
+        if (f_runCpu || f_runCpuStep)
         {
-            cpu.Run(1, cycleCount);
+            m_bus.m_cpu.Run(1, cycleCount);
+            f_runCpuStep = false;
         }
+
+       
     }
 }
 
@@ -138,6 +147,18 @@ void Application::drawImgui()
 
     ImGui::Begin("yazi");
 
+    auto it = m_disassemblyTable.find(m_bus.m_RAM[m_bus.m_cpu.GetPC()]);
+
+    //tabloda bu degisken kayitlimi?
+    if (it != m_disassemblyTable.end())
+    {
+        ImGui::Text("pc => %s [%04X]", it->second.c_str(), m_bus.m_cpu.GetPC());
+    }
+    else
+    {
+        ImGui::Text("tanimsiz komut");
+    }
+
     if (ImGui::Button("Derle DASM"))
     {
         callAssembler();
@@ -146,13 +167,20 @@ void Application::drawImgui()
 
     if (ImGui::Button("Sifirla"))
     {
-        cpu.Reset();
+        m_bus.m_cpu.Reset();
+        m_bus.m_gpu.reset();
     }
 
     if (ImGui::Button("Durdur"))
     {
         f_runCpu = !f_runCpu;
-    }    
+    }
+
+    if (ImGui::Button("Adim"))
+    {
+        f_runCpuStep = !f_runCpuStep;
+        f_runCpu = false;
+    }
 
     static ImGuiTableFlags flags = ImGuiTableFlags_SizingFixedFit
         | ImGuiTableFlags_RowBg
@@ -171,19 +199,28 @@ void Application::drawImgui()
         //sonraki satira gec
         ImGui::TableHeadersRow();
 
-        drawRegisterRow("PC", cpu.GetPC());
-        drawRegisterRow("flag", cpu.GetP());
-        drawRegisterRow("Sp", cpu.GetS());
+        drawRegisterRow("PC", m_bus.m_cpu.GetPC());
+        drawRegisterRow("flag", m_bus.m_cpu.GetP());
+        drawRegisterRow("Sp", m_bus.m_cpu.GetS());
 
-        drawRegisterRow("A", cpu.GetA());
-        drawRegisterRow("X", cpu.GetX());
-        drawRegisterRow("Y", cpu.GetY());
+        drawRegisterRow("A", m_bus.m_cpu.GetA());
+        drawRegisterRow("X", m_bus.m_cpu.GetX());
+        drawRegisterRow("Y", m_bus.m_cpu.GetY());
+
+        drawRegisterRow("IRQ", m_bus.m_cpu.getIRQ());
+
+        //e(ekran) k(karti) 
+        drawRegisterRow("ekx", m_bus.m_gpu.m_regPosx);
+        drawRegisterRow("eky", m_bus.m_gpu.m_regPosy);
+        drawRegisterRow("ekc", m_bus.m_gpu.m_regCommand);
+
 
         ImGui::EndTable();
     }
-
-    static MemoryEditor mem_edit;
-    mem_edit.DrawWindow("Memory Editor", m_RAM.get(), 0xFFFF);
+            
+    //TODO DIKKAT lan bu sey hata vermiyor bos... isaretci gosteriyor 
+    //eger boyle yazarsam (m_RAM.get()) m_RAM suan bus icinde
+    m_mem_edit.DrawWindow("Memory Editor", m_bus.m_RAM.get(), 0xFFFF);
 
     ImGui::End();
 
@@ -213,6 +250,15 @@ void Application::inputs()
         case SDLK_ESCAPE:
             f_running = false;
             break;
+        }
+
+        if (event.type == SDL_EVENT_KEY_DOWN ||
+            event.type == SDL_EVENT_KEY_UP)
+        {        
+            if (m_bus.m_keyboard.run(event))
+            {                
+                m_bus.m_cpu.IRQ(false);
+            }
         }
     }
 }

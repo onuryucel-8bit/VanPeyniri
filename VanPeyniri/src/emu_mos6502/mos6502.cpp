@@ -1646,7 +1646,7 @@ void mos6502::Run(
       }
 
       // fetch
-      opcode = Read(pc++);
+      opcode = Read(pc++);   
 
       // decode
       instr = InstrTable[opcode];
@@ -1703,6 +1703,11 @@ void mos6502::Exec(Instr i)
    branched = false;
    uint16_t src = (this->*i.addr)();
    (this->*i.code)(src);
+}
+
+bool mos6502::getIRQ()
+{
+    return irq_line;
 }
 
 uint16_t mos6502::GetPC()

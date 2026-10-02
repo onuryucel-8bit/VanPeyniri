@@ -10,6 +10,10 @@
 #include <stdint.h>
 #include <stdbool.h>
 
+//27.09.2026 for removing static - C callback function
+//so i can insert non-static callback funcs
+#include <functional>
+
 class mos6502
 {
    private:
@@ -185,12 +189,19 @@ class mos6502
       // read/write/clock-cycle callbacks
       
       //typedef void (*BusWrite)(uint16_t, uint8_t);
-      using BusWrite = void (*)(uint16_t, uint8_t);
+      //using BusWrite = void (*)(uint16_t, uint8_t);
 
       //typedef uint8_t (*BusRead)(uint16_t);
-      using BusRead = uint8_t (*)(uint16_t);
+      //using BusRead = uint8_t (*)(uint16_t);
+
+      ////std::function<input0, input1>
+      using BusWrite = std::function<void(uint16_t, uint8_t)>;
+      //std::function<return val(input0)>
+      using BusRead = std::function<uint8_t(uint16_t)>;
+      
 
       typedef void (*ClockCycle)(mos6502*);
+
       BusRead Read;
       BusWrite Write;
       ClockCycle Cycle;
@@ -227,6 +238,8 @@ class mos6502
                            // tion
 
       // Various getter/setters
+
+      bool getIRQ();
 
       uint16_t GetPC();
       uint8_t GetS();

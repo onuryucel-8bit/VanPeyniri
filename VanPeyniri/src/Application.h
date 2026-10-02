@@ -17,10 +17,8 @@
 
 #include "reproc++/reproc.hpp"
 
-#include "mos6502/mos6502.h"
 
-
-
+#include "Bus.h"
 
 class Application
 {
@@ -44,9 +42,6 @@ private:
 
 	void drawRegisterRow(const char* name, uint8_t value);
 
-	static void busWrite(uint16_t address, uint8_t data);
-	static uint8_t busRead(uint16_t address);
-
 	void callAssembler();
 	void loadAsmFile();
 
@@ -58,9 +53,11 @@ private:
 	SDL_Renderer* renderer = nullptr;
 	bool f_running = true;
 	bool f_runCpu = true;
+	bool f_runCpuStep = false;
 
-	mos6502 cpu;
+	Bus m_bus;
+	MemoryEditor m_mem_edit;
 	
-	inline static std::unique_ptr<uint8_t[]> m_RAM = std::make_unique<uint8_t[]>(0x10000);;
+	std::unordered_map<uint8_t, std::string> m_disassemblyTable;
 };
 
