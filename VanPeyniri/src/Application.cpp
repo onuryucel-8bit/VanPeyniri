@@ -66,6 +66,7 @@ void Application::callAssembler()
         std::cout << "err.message()" << err.message() << "\n";
     }
 
+    //TODO neden 5 saniye?
     using namespace std::chrono_literals;
     std::pair<int, std::error_code> status = process.wait(5s);
 }

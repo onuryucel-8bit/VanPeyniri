@@ -7,6 +7,16 @@ EKK = $1003
 
 KLAVYE = $0A00
 
+HDDi0 = $0A01
+HDDi1 = $0A02
+HDDi2 = $0A03
+HDDi3 = $0A04
+HDDsize = $0A05
+HDDcontrol = $0A06
+HDDstatus = $0A07
+HDDram0 = $0A08
+HDDram1 = $0A09
+
 	seg zeroPage
 	org $0000	
 	ds 10, $2		;10 tane 2 sayisini yerlestir	
@@ -20,6 +30,43 @@ KLAVYE = $0A00
     seg code
 	org $0200   ; Define the code origin at RAM start
 	
+hdddeneme:
+    lda #$30
+    sta HDDi0
+
+    lda #$00
+    sta HDDi1
+
+    lda #$00
+    sta HDDram0
+
+    lda #$02
+    sta HDDram1
+
+    lda #10
+    sta HDDsize
+
+    lda #2
+    sta HDDcontrol
+
+    lda #$30
+    sta HDDi0
+    lda #$00
+    sta HDDi1
+
+    lda #$00
+    sta HDDram0
+    lda #$FF
+    sta HDDram1
+
+    lda #10
+    sta HDDsize
+
+    lda #1
+    sta HDDcontrol
+
+
+
 Start:
     
     
@@ -79,5 +126,5 @@ IRQ:
     org $FFFA
         
     .word nmi       ;NMI Vector
-    .word Start     ;Reset Vector
+    .word hdddeneme     ;Reset Vector
     .word IRQ       ;IRQ/BRK Vector    

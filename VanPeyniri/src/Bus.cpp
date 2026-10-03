@@ -1,6 +1,4 @@
 #include "Bus.h"
-#include "Bus.h"
-
 
 Bus::Bus()
     :m_cpu
@@ -17,6 +15,7 @@ Bus::Bus()
 
 Bus::~Bus()
 {
+    
 }
 
 void Bus::busWrite(uint16_t address, uint8_t data)
@@ -43,8 +42,46 @@ void Bus::busWrite(uint16_t address, uint8_t data)
     case m_gpu.m_COMMAND_INDEX:
         m_gpu.m_regCommand = data;
         break;
-    //===================================//               
+    //===================================//       
+    case m_hdd.m_HADRES_INDEX_0:        
+        m_hdd.m_regHadres0 = data;
+        break;
+
+    case m_hdd.m_HADRES_INDEX_1:
+        m_hdd.m_regHadres1 = data;
+        break;
+
+    case m_hdd.m_HADRES_INDEX_2:
+        m_hdd.m_regHadres2 = data;
+        break;
+
+    case m_hdd.m_HADRES_INDEX_3:
+        m_hdd.m_regHadres3 = data;
+        break;
+
+    case m_hdd.m_HSIZE_INDEX:
+        m_hdd.m_regHSize = data;
+        break;
+
+    case m_hdd.m_HCONTROL_INDEX:
+        m_hdd.m_regHControl = data;
+        m_hdd.run(m_RAM);
+        break;
+
+    case m_hdd.m_HSTATUS_INDEX:
+        m_hdd.m_regHStatus = data;
+        break;
+
+    case m_hdd.m_HRAM_INDEX_0:        
+        m_hdd.m_regHRAMadres0 = data;
+        break;
+
+    case m_hdd.m_HRAM_INDEX_1:
+        m_hdd.m_regHRAMadres1 = data;
+        break;
+    //===================================//
     }
+    
 
     m_RAM[address] = data;
 }
