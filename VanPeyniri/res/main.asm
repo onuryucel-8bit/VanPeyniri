@@ -7,10 +7,19 @@ EKK = $1003
 
 KLAVYE = $0A00
 
+	seg zeroPage
+	org $0000	
+	ds 10, $2		;10 tane 2 sayisini yerlestir	
+	align 256, $aa	;geri kalan yerlere 0xAA sayisini yerlestir
+	
+	seg stack
+	org $0100
+	ds 10, $0	;ds 10 dersem ayni sey varsayilan olarak 0 sayisini yerlestirir
+	align 256, $00
+	
     seg code
-  
-	org $0000   ; Define the code origin at RAM start
-
+	org $0200   ; Define the code origin at RAM start
+	
 Start:
     
     
