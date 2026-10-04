@@ -25,6 +25,11 @@ void GraphicsCard::run()
 		clearBuffer();
 		break;
 
+    //PRINT
+    case 3:
+        print();
+        break;
+
 	}
 
 	m_regCommand = 0;
@@ -50,11 +55,11 @@ void GraphicsCard::draw(SDL_Renderer* renderer)
 			switch (m_vram[y * m_WINDOW_WIDTH + x])
 			{
 			case 0:
-				color = { 0,0,255,255 };
+				color = { 100,100,100,255 };
 				break;
 
 			case 1:
-				color = { 0,255,0,255 };
+				color = { 200,200,200,255 };
 				break;
 			}
 
@@ -74,4 +79,80 @@ void GraphicsCard::clearBuffer()
 void GraphicsCard::drawPixel()
 {
 	m_vram[m_regPosy * m_WINDOW_WIDTH + m_regPosx] = m_regColor;
+}
+
+void GraphicsCard::drawPixel(uint8_t x, uint8_t y, uint8_t color)
+{
+    m_vram[y * m_WINDOW_WIDTH + x] = color;
+}
+
+void GraphicsCard::print()
+{
+    //Bazlama yiyen deniz anasi
+
+    if (vgay >= m_WINDOW_HEIGHT)
+    {
+        vgay = 0;
+    }
+
+    if (vgax > m_WINDOW_WIDTH)
+    {
+        vgax = 0;
+    }
+
+    switch (m_regChar)
+    {
+    case '\n':
+        vgay += 8;
+        vgax = 0;
+
+        return;
+
+    case '\t':
+        vgax += 16;
+        return;
+
+    default:
+        break;
+    }
+
+    uint16_t start_x = vgax;
+    uint16_t start_y = vgay;
+
+    for (uint8_t row = 0; row < 8; row++)
+    {
+        uint8_t line = font8x8[m_regChar][row];
+        uint8_t mask = 1;
+
+        //TODO neden int8_t ?
+        for (int8_t col = 0; col < 8; col++)
+        {
+            uint8_t bit = (line & mask) >> col;
+            mask <<= 1;
+
+            if (bit == 1)
+            {
+                //fg                
+                drawPixel(start_x, start_y, m_regColor);
+            }
+            else
+            {
+                //bg
+                drawPixel(start_x, start_y, m_regBgColor);
+            }
+
+            start_x++;
+        }
+
+        start_x = vgax;
+        start_y++;
+    }
+
+    vgax += 8;
+
+    if (vgax >= m_WINDOW_WIDTH)
+    {
+        vgax = 0;
+        vgay += 8;
+    }
 }

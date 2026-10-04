@@ -42,6 +42,14 @@ void Bus::busWrite(uint16_t address, uint8_t data)
     case m_gpu.m_COMMAND_INDEX:
         m_gpu.m_regCommand = data;
         break;
+
+    case m_gpu.m_CHAR_INDEX:
+        m_gpu.m_regChar = data;        
+        break;
+
+    case m_gpu.m_BGCOLOR_INDEX:
+        m_gpu.m_regBgColor = data;
+        break;
     //===================================//       
     case m_hdd.m_HADRES_INDEX_0:        
         m_hdd.m_regHadres0 = data;

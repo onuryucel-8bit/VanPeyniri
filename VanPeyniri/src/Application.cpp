@@ -215,6 +215,8 @@ void Application::drawImgui()
         drawRegisterRow("eky", m_bus.m_gpu.m_regPosy);
         drawRegisterRow("ekc", m_bus.m_gpu.m_regCommand);
 
+        drawRegisterRow("klavye", m_bus.m_keyboard.m_regKey);
+
 
         ImGui::EndTable();
     }

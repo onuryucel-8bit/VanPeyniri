@@ -4,6 +4,10 @@ EKX = $1000
 EKY = $1001
 EKR = $1002
 EKK = $1003
+;karakter
+EK_KAR = $1004
+;Arkaplan Rrengi
+EK_AR = $1005
 
 KLAVYE = $0A00
 
@@ -65,7 +69,7 @@ hdddeneme:
     lda #1
     sta HDDcontrol
 
-
+   
 
 Start:
     
@@ -74,6 +78,25 @@ Start:
 drawloop:
     ;kesmeleri kapat
     sei
+
+    lda #5
+    sta EKX
+    lda #5
+    sta EKY
+    lda #1
+    sta EKR
+
+    ;arkaplan rengi
+    lda #0
+    sta EK_AR
+
+    ;karakter
+    lda #$41
+    sta EK_KAR
+
+    ;komut print
+    lda #3
+    sta EKK
 
     ;posx
 	lda px
@@ -94,7 +117,8 @@ drawloop:
     ;kesmeleri ac
     cli
 
-    jmp drawloop
+loop:
+    jmp loop
 
 px:
     .byte 0
