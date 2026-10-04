@@ -38,7 +38,9 @@
                                         │geri yukler kaldigi yerden devam eder             │                          
                                         └──────────────────────────────────────────────────┘                          
 
-```                                        
+``` 
+
+```
 processor 6502
 
 KLAVYE = $0A00
@@ -114,3 +116,5 @@ IRQ:
     .word nmi       ;NMI Vector
     .word Main      ;Reset Vector
     .word IRQ       ;IRQ/BRK Vector    
+
+```
